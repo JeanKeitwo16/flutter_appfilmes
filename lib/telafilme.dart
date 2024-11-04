@@ -166,7 +166,6 @@ class _telaFilmeState extends State<telaFilme> {
                                   color: Colors.white,
                                 ),
                               ),
-
                           IconButton(
                             onPressed: () {},
                             icon: const Icon(

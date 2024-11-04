@@ -1,6 +1,8 @@
 import 'package:flutter_appfilmes/tela2.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_appfilmes/novocomponente.dart';
+import 'package:flutter_appfilmes/movieliked.dart';
+import 'package:flutter_appfilmes/telafavoritos.dart';
 
 void main() {
   runApp(const MyApp());
@@ -15,7 +17,7 @@ class MyApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       title: "App Login",
       home: Scaffold(
-        body: minhaTela1(),
+        body: TelaFavoritos(),
       ),
     );
   }

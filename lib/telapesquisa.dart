@@ -1,13 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_appfilmes/telafilme.dart';
 import 'package:http/http.dart' as http;
-import 'package:flutter_appfilmes/movie.dart';
+import 'package:flutter_appfilmes/filme.dart';
 import 'package:flutter_appfilmes/DatabaseHelper.dart';
 import 'dart:convert';
 
-void main() => runApp(minhaTela2());
+void main() => runApp(TelaPesquisa());
 
-class minhaTela2 extends StatelessWidget {
+class TelaPesquisa extends StatelessWidget {
+  const TelaPesquisa({super.key});
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -19,12 +21,14 @@ class minhaTela2 extends StatelessWidget {
 }
 
 class MovieListScreen extends StatefulWidget {
+  const MovieListScreen({super.key});
+
   @override
   _MovieListScreenState createState() => _MovieListScreenState();
 }
 
 class _MovieListScreenState extends State<MovieListScreen> {
-  List<Movie> listaFilmes = [];
+  List<Filme> listaFilmes = [];
   bool isLoading = false;
   TextEditingController pesquisa = TextEditingController();
 
@@ -41,7 +45,7 @@ class _MovieListScreenState extends State<MovieListScreen> {
       if (data['Response'] == "True") {
         setState(() {
           listaFilmes = (data['Search'] as List)
-              .map((movie) => Movie.fromJson({
+              .map((movie) => Filme.fromJson({
                     ...movie,
                     'Genre': movie['Genre'] ?? 'N/A',
                   }))
@@ -62,7 +66,7 @@ class _MovieListScreenState extends State<MovieListScreen> {
   @override
   Widget build(BuildContext context) {
     return Container(
-      decoration: BoxDecoration(
+      decoration: const BoxDecoration(
         gradient: LinearGradient(
           colors: [
             Color.fromARGB(255, 0, 0, 0),
@@ -75,16 +79,16 @@ class _MovieListScreenState extends State<MovieListScreen> {
       child: Column(
         children: [
           Padding(
-            padding: EdgeInsets.all(16.0),
+            padding: const EdgeInsets.all(16.0),
             child: Row(
               children: [
                 Expanded(
                   child: TextField(
                     controller: pesquisa,
-                    style: TextStyle(color: Colors.white),
+                    style: const TextStyle(color: Colors.white),
                     decoration: InputDecoration(
                       hintText: "Pesquise um filme ou série...",
-                      hintStyle: TextStyle(color: Colors.white54),
+                      hintStyle: const TextStyle(color: Colors.white54),
                       filled: true,
                       fillColor: Colors.white24,
                       border: OutlineInputBorder(
@@ -94,7 +98,7 @@ class _MovieListScreenState extends State<MovieListScreen> {
                   ),
                 ),
                 IconButton(
-                  icon: Icon(Icons.search, color: Colors.white),
+                  icon: const Icon(Icons.search, color: Colors.white),
                   onPressed: () {
                     fetchMovies(pesquisa.text);
                   },
@@ -104,18 +108,18 @@ class _MovieListScreenState extends State<MovieListScreen> {
           ),
           Expanded(
             child: isLoading
-                ? Center(child: CircularProgressIndicator())
+                ? const Center(child: CircularProgressIndicator())
                 : ListView.builder(
-                    padding: EdgeInsets.all(16.0),
+                    padding: const EdgeInsets.all(16.0),
                     itemCount: listaFilmes.length,
                     itemBuilder: (context, index) {
                       final movie = listaFilmes[index];
                       return Card(
                         color: Colors.transparent,
                         elevation: 0,
-                        margin: EdgeInsets.only(bottom: 16.0),
+                        margin: const EdgeInsets.only(bottom: 16.0),
                         child: Padding(
-                          padding: EdgeInsets.all(16.0),
+                          padding: const EdgeInsets.all(16.0),
                           child: Row(
                             children: [
                               GestureDetector(
@@ -143,20 +147,20 @@ class _MovieListScreenState extends State<MovieListScreen> {
                                   fit: BoxFit.cover,
                                 ),
                               ),
-                              SizedBox(width: 16.0),
+                              const SizedBox(width: 16.0),
                               Expanded(
                                 child: Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
                                     Text(
                                       "${movie.titulo} (${movie.ano})",
-                                      style: TextStyle(
+                                      style: const TextStyle(
                                         color: Colors.white,
                                         fontSize: 18.0,
                                         fontWeight: FontWeight.bold,
                                       ),
                                     ),
-                                    SizedBox(height: 8.0),
+                                    const SizedBox(height: 8.0),
                                     Row(
                                       children: [
                                         TextButton(
@@ -170,14 +174,14 @@ class _MovieListScreenState extends State<MovieListScreen> {
                                               ),
                                             );
                                           },
-                                          child: Icon(Icons.line_style,
+                                          child: const Icon(Icons.line_style,
                                               color: Colors.white),
                                         ),
-                                        SizedBox(width: 16.0),
+                                        const SizedBox(width: 16.0),
                                         TextButton(
                                           onPressed: () async {
                                             await DatabaseHelper()
-                                                .addMovieToFavorites(
+                                                .favoritarFilme(
                                                     movie.imdbID);
                                             ScaffoldMessenger.of(context)
                                                 .showSnackBar(
@@ -186,13 +190,13 @@ class _MovieListScreenState extends State<MovieListScreen> {
                                                       '${movie.titulo} adicionado aos favoritos!')),
                                             );
                                           },
-                                          child: Icon(Icons.favorite_border,
+                                          child: const Icon(Icons.favorite_border,
                                               color: Colors.white),
                                         ),
-                                        SizedBox(width: 16.0),
+                                        const SizedBox(width: 16.0),
                                         TextButton(
                                           onPressed: () {},
-                                          child: Icon(Icons.visibility,
+                                          child: const Icon(Icons.visibility,
                                               color: Colors.white),
                                         ),
                                       ],

@@ -1,14 +1,14 @@
-import 'package:flutter_appfilmes/tela2.dart';
+import 'package:flutter_appfilmes/telapesquisa.dart';
 import 'package:flutter/material.dart';
 
-class minhaTela1 extends StatefulWidget {
-  const minhaTela1({super.key});
+class TelaLogin extends StatefulWidget {
+  const TelaLogin({super.key});
 
   @override
-  State<minhaTela1> createState() => _tela1State();
+  State<TelaLogin> createState() => _tela1State();
 }
 
-class _tela1State extends State<minhaTela1> {
+class _tela1State extends State<TelaLogin> {
   bool passwordVisible = false;
   final usuarioController = TextEditingController();
   final senhaController = TextEditingController();
@@ -25,14 +25,14 @@ class _tela1State extends State<minhaTela1> {
       mainAxisAlignment: MainAxisAlignment.center,
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
-        CircleAvatar(
+        const CircleAvatar(
           radius: 40,
           backgroundImage: NetworkImage(
             "https://static.vecteezy.com/system/resources/thumbnails/001/840/618/small/picture-profile-icon-male-icon-human-or-people-sign-and-symbol-free-vector.jpg",
           ),
         ),
-        SizedBox(height: 10),
-        Container(
+        const SizedBox(height: 10),
+        SizedBox(
           width: 320,
           child: Column(
             children: [
@@ -46,7 +46,7 @@ class _tela1State extends State<minhaTela1> {
                   labelText: 'Usuário',
                 ),
               ),
-              SizedBox(height: 10),
+              const SizedBox(height: 10),
               TextField(
                 controller: senhaController,
                 obscureText: passwordVisible, //TextFieldUsuario
@@ -72,17 +72,17 @@ class _tela1State extends State<minhaTela1> {
             ],
           ),
         ),
-        SizedBox(height: 10),
+        const SizedBox(height: 10),
         ElevatedButton(
             onPressed: () {
               String usuario = usuarioController.text;
               String senha = senhaController.text;
               if (usuario == "Jean" && senha == "jean123") {
                 Navigator.push(context, MaterialPageRoute(builder: (context){
-                  return minhaTela2();
+                  return TelaPesquisa();
                 }));
               } else {
-                final snackBar = SnackBar(backgroundColor: Color.fromARGB(255, 37, 136, 123),
+                final snackBar = SnackBar(backgroundColor: const Color.fromARGB(255, 37, 136, 123),
                     content: const Text("Senha incorreta!"),
                     action: SnackBarAction(backgroundColor: Colors.white,
                       label: 'Undo',
@@ -91,8 +91,8 @@ class _tela1State extends State<minhaTela1> {
                 ScaffoldMessenger.of(context).showSnackBar(snackBar);
               }
             },
-            child: Padding(
-                padding: const EdgeInsets.all(20.0),
+            child: const Padding(
+                padding: EdgeInsets.all(20.0),
                 child: Text("Login", style: TextStyle(fontSize: 20.0))))
       ],
     ));

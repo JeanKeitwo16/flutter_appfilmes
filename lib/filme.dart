@@ -1,6 +1,5 @@
-import 'package:flutter/material.dart';
 
-class Movie {
+class Filme {
   final String titulo;
   final String ano;
   final String poster;
@@ -8,10 +7,10 @@ class Movie {
   final String imdbID;
   final String genero;
 
-  Movie({required this.titulo, required this.ano, required this.poster, this.sinopse = "", required this.imdbID, required this.genero});
+  Filme({required this.titulo, required this.ano, required this.poster, this.sinopse = "", required this.imdbID, required this.genero});
 
-  factory Movie.fromJson(Map<String, dynamic> json) {
-    return Movie(
+  factory Filme.fromJson(Map<String, dynamic> json) {
+    return Filme(
       titulo: json['Title'],
       ano: json['Year'],
       poster: json['Poster'],

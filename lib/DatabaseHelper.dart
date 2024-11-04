@@ -1,6 +1,6 @@
 import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
-import 'package:flutter_appfilmes/movieliked.dart';
+import 'package:flutter_appfilmes/filmecurtido.dart';
 
 class DatabaseHelper {
   static final DatabaseHelper _instance = DatabaseHelper._internal();
@@ -32,7 +32,7 @@ class DatabaseHelper {
     );
   }
 
-  Future<void> addMovieToFavorites(String imdbID) async {
+  Future<void> favoritarFilme(String imdbID) async {
     final db = await database;
     await db.insert(
       'MovieLiked',
@@ -41,22 +41,29 @@ class DatabaseHelper {
     );
   }
 
-  Future<List<MovieLiked>> getFavoriteMovies() async {
+  Future<List<FilmeCurtido>> getFilmes() async {
   final db = await database;
   final List<Map<String, dynamic>> maps = await db.query('MovieLiked');
-
-  // Converte a lista de maps em uma lista de MovieLiked
   return List.generate(maps.length, (i) {
-    return MovieLiked.fromMap(maps[i]);
+    return FilmeCurtido.fromMap(maps[i]);
   });
 }
 
-  Future<void> removeMovieFromFavorites(String imdbID) async {
+  Future<void> removerFilme(String imdbID) async {
     final db = await database;
     await db.delete(
       'MovieLiked',
       where: 'imdbID = ?',
       whereArgs: [imdbID],
     );
+  }
+  Future<bool> verificarFavorito(String imdbID) async {
+    final db = await database;
+    final List<Map<String, dynamic>> result = await db.query(
+      'MovieLiked',
+      where: 'imdbID = ?',
+      whereArgs: [imdbID],
+    );
+    return result.isNotEmpty; // Retorna true se houver resultados, ou false caso contrário
   }
 }

@@ -1,18 +1,20 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_appfilmes/movie.dart';
-import 'package:flutter_appfilmes/movieliked.dart';
+import 'package:flutter_appfilmes/filme.dart';
+import 'package:flutter_appfilmes/filmecurtido.dart';
 import 'package:flutter_appfilmes/DatabaseHelper.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 
 class TelaFavoritos extends StatefulWidget {
+  const TelaFavoritos({super.key});
+
   @override
   _TelaFavoritosState createState() => _TelaFavoritosState();
 }
 
 class _TelaFavoritosState extends State<TelaFavoritos> {
   final DatabaseHelper _databaseHelper = DatabaseHelper();
-  List<Movie> _favoriteMovies = [];
+  List<Filme> _favoriteMovies = [];
   bool _isLoading = true; // Variável para controlar o estado de carregamento
 
   @override
@@ -23,8 +25,8 @@ class _TelaFavoritosState extends State<TelaFavoritos> {
 
   Future<void> _loadFavoriteMovies() async {
     try {
-      List<MovieLiked> likedMovies = await _databaseHelper.getFavoriteMovies();
-      List<Movie> movies = [];
+      List<FilmeCurtido> likedMovies = await _databaseHelper.getFilmes();
+      List<Filme> movies = [];
 
       for (var likedMovie in likedMovies) {
         final response = await http.get(
@@ -34,7 +36,7 @@ class _TelaFavoritosState extends State<TelaFavoritos> {
         if (response.statusCode == 200) {
           final data = json.decode(response.body);
           if (data['Response'] == "True") {
-            movies.add(Movie.fromJson(data));
+            movies.add(Filme.fromJson(data));
           }
         } else {
           throw Exception('Falha ao carregar o filme com ID: ${likedMovie.imdbID}');
@@ -60,25 +62,25 @@ class _TelaFavoritosState extends State<TelaFavoritos> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Filmes Favoritados'),
+        title: const Text('Filmes Favoritados'),
         backgroundColor: Colors.black,
       ),
       body: _isLoading
-          ? Center(child: CircularProgressIndicator()) // Exibe o indicador de carregamento
+          ? const Center(child: CircularProgressIndicator()) // Exibe o indicador de carregamento
           : _favoriteMovies.isEmpty
-              ? Center(child: Text('Nenhum filme favoritado encontrado.')) // Mensagem se não houver filmes
+              ? const Center(child: Text('Nenhum filme favoritado encontrado.')) // Mensagem se não houver filmes
               : ListView.builder(
                   itemCount: _favoriteMovies.length,
                   itemBuilder: (context, index) {
                     final movie = _favoriteMovies[index];
                     return Card(
-                      margin: EdgeInsets.all(8.0),
+                      margin: const EdgeInsets.all(8.0),
                       child: ListTile(
-                        contentPadding: EdgeInsets.all(8.0),
+                        contentPadding: const EdgeInsets.all(8.0),
                         leading: Image.network(movie.poster, width: 50),
                         title: Text(
                           movie.titulo,
-                          style: TextStyle(fontWeight: FontWeight.bold),
+                          style: const TextStyle(fontWeight: FontWeight.bold),
                         ),
                         subtitle: Text(movie.ano),
                         onTap: () {

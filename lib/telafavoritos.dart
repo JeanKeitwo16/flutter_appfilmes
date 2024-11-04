@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_appfilmes/filme.dart';
 import 'package:flutter_appfilmes/filmecurtido.dart';
 import 'package:flutter_appfilmes/DatabaseHelper.dart';
+import 'package:flutter_appfilmes/telafilme.dart';
+import 'telafilme.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 
@@ -60,36 +62,123 @@ class _TelaFavoritosState extends State<TelaFavoritos> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Filmes Favoritados'),
-        backgroundColor: Colors.black,
+    return Container(
+      decoration: const BoxDecoration(
+        gradient: LinearGradient(
+          colors: [
+            Color.fromARGB(255, 0, 0, 0),
+            Color.fromARGB(255, 56, 36, 80)
+          ],
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+        ),
       ),
-      body: _isLoading
-          ? const Center(child: CircularProgressIndicator()) // Exibe o indicador de carregamento
-          : _favoriteMovies.isEmpty
-              ? const Center(child: Text('Nenhum filme favoritado encontrado.')) // Mensagem se não houver filmes
-              : ListView.builder(
-                  itemCount: _favoriteMovies.length,
-                  itemBuilder: (context, index) {
-                    final movie = _favoriteMovies[index];
-                    return Card(
-                      margin: const EdgeInsets.all(8.0),
-                      child: ListTile(
-                        contentPadding: const EdgeInsets.all(8.0),
-                        leading: Image.network(movie.poster, width: 50),
-                        title: Text(
-                          movie.titulo,
-                          style: const TextStyle(fontWeight: FontWeight.bold),
-                        ),
-                        subtitle: Text(movie.ano),
-                        onTap: () {
-                          // Aqui você pode navegar para uma tela de detalhes se desejar
-                        },
-                      ),
-                    );
-                  },
-                ),
+      child: Scaffold(backgroundColor: Colors.transparent,
+        body: _isLoading
+            ? const Center(child: CircularProgressIndicator()) // Exibe o indicador de carregamento
+            : _favoriteMovies.isEmpty
+                ? const Center(child: Text('Nenhum filme favoritado encontrado.')) // Mensagem se não houver filmes
+                : ListView.builder(
+                    itemCount: _favoriteMovies.length,
+                    itemBuilder: (context, index) {
+                      final movie = _favoriteMovies[index];
+                      return Card(
+                          color: Colors.transparent,
+                          elevation: 0,
+                          margin: const EdgeInsets.only(bottom: 16.0),
+                          child: Padding(
+                            padding: const EdgeInsets.all(16.0),
+                            child: Row(
+                              children: [
+                                GestureDetector(
+                                  onTap: () {
+                                    showDialog(
+                                      context: context,
+                                      builder: (context) => Dialog(
+                                        backgroundColor: Colors.transparent,
+                                        child: Column(
+                                          mainAxisSize: MainAxisSize.min,
+                                          children: [
+                                            Image.network(
+                                              movie.poster,
+                                              fit: BoxFit.cover,
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                    );
+                                  },
+                                  child: Image.network(
+                                    movie.poster,
+                                    width: 100,
+                                    height: 150,
+                                    fit: BoxFit.cover,
+                                  ),
+                                ),
+                                const SizedBox(width: 16.0),
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        "${movie.titulo} (${movie.ano})",
+                                        style: const TextStyle(
+                                          color: Colors.white,
+                                          fontSize: 18.0,
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                      ),
+                                      const SizedBox(height: 8.0),
+                                      Row(
+                                        children: [
+                                          TextButton(
+                                            onPressed: () {
+                                              Navigator.push(
+                                                context,
+                                                MaterialPageRoute(
+                                                  builder: (context) => telaFilme(
+                                                    imdbID: movie.imdbID,
+                                                  ),
+                                                ),
+                                              );
+                                            },
+                                            child: const Icon(Icons.line_style,
+                                                color: Colors.white),
+                                          ),
+                                          const SizedBox(width: 16.0),
+                                          TextButton(
+                                            onPressed: () async {
+                                              await DatabaseHelper()
+                                                  .favoritarFilme(
+                                                      movie.imdbID);
+                                              ScaffoldMessenger.of(context)
+                                                  .showSnackBar(
+                                                SnackBar(
+                                                    content: Text(
+                                                        '${movie.titulo} adicionado aos favoritos!')),
+                                              );
+                                            },
+                                            child: const Icon(Icons.favorite_border,
+                                                color: Colors.white),
+                                          ),
+                                          const SizedBox(width: 16.0),
+                                          TextButton(
+                                            onPressed: () {},
+                                            child: const Icon(Icons.visibility,
+                                                color: Colors.white),
+                                          ),
+                                        ],
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        );
+                    },
+                  ),
+      ),
     );
   }
 }

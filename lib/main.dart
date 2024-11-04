@@ -15,7 +15,7 @@ class MyApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       title: "App Login",
       home: Scaffold(
-        body: TelaPesquisa(),
+        body: TelaFavoritos(),
       ),
     );
   }

@@ -3,7 +3,6 @@ import 'package:flutter_appfilmes/filme.dart';
 import 'package:flutter_appfilmes/filmecurtido.dart';
 import 'package:flutter_appfilmes/DatabaseHelper.dart';
 import 'package:flutter_appfilmes/telafilme.dart';
-import 'telafilme.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 
@@ -27,6 +26,16 @@ class _TelaFavoritosState extends State<TelaFavoritos> {
     _loadFavoriteMovies();
   }
 
+  Future<void> verificarFavorito(String imdbID) async {
+    favoritado = await DatabaseHelper().verificarFavorito(imdbID);
+    setState(() {});
+  }
+
+  Future<void> verificarWatchList(String imdbID) async {
+    marcarAssistir = await DatabaseHelper().verificarWatch(imdbID);
+    setState(() {});
+  }
+
   Future<void> _loadFavoriteMovies() async {
     try {
       List<FilmeCurtido> filmesCurtidos = await _databaseHelper.getFilmesFavoritos();
@@ -41,6 +50,8 @@ class _TelaFavoritosState extends State<TelaFavoritos> {
           final data = json.decode(resposta.body);
           if (data['Response'] == "True") {
             filmes.add(Filme.fromJson(data));
+            await verificarFavorito(filmeCurtido.imdbID);
+            await verificarWatchList(filmeCurtido.imdbID);
           }
         } else {
           throw Exception('Falha ao carregar o filme com ID: ${filmeCurtido.imdbID}');
@@ -137,7 +148,7 @@ class _TelaFavoritosState extends State<TelaFavoritos> {
                                             Navigator.push(
                                               context,
                                               MaterialPageRoute(
-                                                builder: (context) => telaFilme(
+                                                builder: (context) => TelaFilme(
                                                   imdbID: filme.imdbID,
                                                 ),
                                               ),

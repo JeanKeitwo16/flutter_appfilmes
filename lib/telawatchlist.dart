@@ -17,13 +17,23 @@ class _TelaWatchListState extends State<TelaWatchList> {
   final DatabaseHelper _databaseHelper = DatabaseHelper();
   List<Filme> watchListFilmes = [];
   bool _isLoading = true;
-  bool favoritado = false;
-  bool marcarAssistir = false;
+
+  // Mapeia o estado de cada filme (favoritado, watchlist)
+  Map<String, bool> filmesFavoritados = {};
+  Map<String, bool> filmesWatchlist = {};
 
   @override
   void initState() {
     super.initState();
     _loadFavoriteMovies();
+  }
+
+  Future<void> verificarFavorito(String imdbID) async {
+    filmesFavoritados[imdbID] = await DatabaseHelper().verificarFavorito(imdbID);
+  }
+
+  Future<void> verificarWatchList(String imdbID) async {
+    filmesWatchlist[imdbID] = await DatabaseHelper().verificarWatch(imdbID);
   }
 
   Future<void> _loadFavoriteMovies() async {
@@ -40,6 +50,8 @@ class _TelaWatchListState extends State<TelaWatchList> {
           final data = json.decode(response.body);
           if (data['Response'] == "True") {
             filmes.add(Filme.fromJson(data));
+            await verificarFavorito(filmeAssistir.imdbID);
+            await verificarWatchList(filmeAssistir.imdbID);
           }
         } else {
           throw Exception('Falha ao carregar o filme com ID: ${filmeAssistir.imdbID}');
@@ -136,7 +148,7 @@ class _TelaWatchListState extends State<TelaWatchList> {
                                             Navigator.push(
                                               context,
                                               MaterialPageRoute(
-                                                builder: (context) => telaFilme(
+                                                builder: (context) => TelaFilme(
                                                   imdbID: filme.imdbID,
                                                 ),
                                               ),
@@ -148,12 +160,11 @@ class _TelaWatchListState extends State<TelaWatchList> {
                                         const SizedBox(width: 16.0),
                                         TextButton(
                                           onPressed: () async {
-                                            if (favoritado) {
+                                            if (filmesFavoritados[filme.imdbID] ?? false) {
                                               await DatabaseHelper()
-                                                  .removerFilmeFavorito(
-                                                      filme.imdbID);
+                                                  .removerFilmeFavorito(filme.imdbID);
                                               setState(() {
-                                                favoritado = false;
+                                                filmesFavoritados[filme.imdbID] = false;
                                               });
                                               ScaffoldMessenger.of(context)
                                                   .showSnackBar(
@@ -166,7 +177,7 @@ class _TelaWatchListState extends State<TelaWatchList> {
                                               await DatabaseHelper()
                                                   .favoritarFilme(filme.imdbID);
                                               setState(() {
-                                                favoritado = true;
+                                                filmesFavoritados[filme.imdbID] = true;
                                               });
                                               ScaffoldMessenger.of(context)
                                                   .showSnackBar(
@@ -178,7 +189,7 @@ class _TelaWatchListState extends State<TelaWatchList> {
                                             }
                                           },
                                           child: Icon(
-                                            favoritado
+                                            filmesFavoritados[filme.imdbID] ?? false
                                                 ? Icons.favorite
                                                 : Icons.favorite_border,
                                             color: Colors.white,
@@ -187,11 +198,11 @@ class _TelaWatchListState extends State<TelaWatchList> {
                                         const SizedBox(width: 16.0),
                                         TextButton(
                                           onPressed: () async {
-                                            if (marcarAssistir) {
+                                            if (filmesWatchlist[filme.imdbID] ?? false) {
                                               await DatabaseHelper()
                                                   .removerWatch(filme.imdbID);
                                               setState(() {
-                                                marcarAssistir = false;
+                                                filmesWatchlist[filme.imdbID] = false;
                                               });
                                               ScaffoldMessenger.of(context)
                                                   .showSnackBar(
@@ -204,7 +215,7 @@ class _TelaWatchListState extends State<TelaWatchList> {
                                               await DatabaseHelper()
                                                   .adicionarWatch(filme.imdbID);
                                               setState(() {
-                                                marcarAssistir = true;
+                                                filmesWatchlist[filme.imdbID] = true;
                                               });
                                               ScaffoldMessenger.of(context)
                                                   .showSnackBar(
@@ -216,7 +227,7 @@ class _TelaWatchListState extends State<TelaWatchList> {
                                             }
                                           },
                                           child: Icon(
-                                            marcarAssistir
+                                            filmesWatchlist[filme.imdbID] ?? false
                                                 ? Icons.visibility
                                                 : Icons.visibility_outlined,
                                             color: Colors.white,

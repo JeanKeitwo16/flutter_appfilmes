@@ -170,7 +170,7 @@ class _MovieListScreenState extends State<MovieListScreen> {
                                             Navigator.push(
                                               context,
                                               MaterialPageRoute(
-                                                builder: (context) => telaFilme(
+                                                builder: (context) => TelaFilme(
                                                   imdbID: movie.imdbID,
                                                 ),
                                               ),

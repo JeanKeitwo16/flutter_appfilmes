@@ -1,20 +1,18 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_appfilmes/telafilme.dart';
 import 'package:http/http.dart' as http;
-import 'package:flutter_appfilmes/filme.dart';
 import 'package:flutter_appfilmes/DatabaseHelper.dart';
 import 'dart:convert';
 
-class telaFilme extends StatefulWidget {
+class TelaFilme extends StatefulWidget {
   final String imdbID;
 
-  const telaFilme({super.key, required this.imdbID});
+  const TelaFilme({super.key, required this.imdbID});
 
   @override
-  _telaFilmeState createState() => _telaFilmeState();
+  _TelaFilmeState createState() => _TelaFilmeState();
 }
 
-class _telaFilmeState extends State<telaFilme> {
+class _TelaFilmeState extends State<TelaFilme> {
   late String titulo;
   late String ano;
   late String poster;
@@ -60,7 +58,7 @@ class _telaFilmeState extends State<telaFilme> {
     setState(() {});
   }
   Future<void> verificarWatchList() async {
-    favoritado = await DatabaseHelper().verificarWatch(widget.imdbID);
+    marcarAssistir = await DatabaseHelper().verificarWatch(widget.imdbID);
     setState(() {});
   }
 

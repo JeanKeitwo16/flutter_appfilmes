@@ -17,8 +17,9 @@ class _TelaFavoritosState extends State<TelaFavoritos> {
   final DatabaseHelper _databaseHelper = DatabaseHelper();
   List<Filme> filmesFavoritos = [];
   bool _isLoading = true;
-  bool favoritado = false;
-  bool marcarAssistir = false;
+
+  Map<String, bool> filmesFavoritados = {};
+  Map<String, bool> filmesWatchlist = {};
 
   @override
   void initState() {
@@ -27,23 +28,23 @@ class _TelaFavoritosState extends State<TelaFavoritos> {
   }
 
   Future<void> verificarFavorito(String imdbID) async {
-    favoritado = await DatabaseHelper().verificarFavorito(imdbID);
-    setState(() {});
+    filmesFavoritados[imdbID] = await DatabaseHelper().verificarFavorito(imdbID);
   }
 
   Future<void> verificarWatchList(String imdbID) async {
-    marcarAssistir = await DatabaseHelper().verificarWatch(imdbID);
-    setState(() {});
+    filmesWatchlist[imdbID] = await DatabaseHelper().verificarWatch(imdbID);
   }
 
   Future<void> _loadFavoriteMovies() async {
     try {
-      List<FilmeCurtido> filmesCurtidos = await _databaseHelper.getFilmesFavoritos();
+      List<FilmeCurtido> filmesCurtidos =
+          await _databaseHelper.getFilmesFavoritos();
       List<Filme> filmes = [];
 
       for (var filmeCurtido in filmesCurtidos) {
         final resposta = await http.get(
-          Uri.parse('https://www.omdbapi.com/?i=${filmeCurtido.imdbID}&apikey=94a7ea1'),
+          Uri.parse(
+              'https://www.omdbapi.com/?i=${filmeCurtido.imdbID}&apikey=94a7ea1'),
         );
 
         if (resposta.statusCode == 200) {
@@ -54,7 +55,8 @@ class _TelaFavoritosState extends State<TelaFavoritos> {
             await verificarWatchList(filmeCurtido.imdbID);
           }
         } else {
-          throw Exception('Falha ao carregar o filme com ID: ${filmeCurtido.imdbID}');
+          throw Exception(
+              'Falha ao carregar o filme com ID: ${filmeCurtido.imdbID}');
         }
       }
 
@@ -85,63 +87,65 @@ class _TelaFavoritosState extends State<TelaFavoritos> {
           end: Alignment.bottomCenter,
         ),
       ),
-      child: Scaffold(backgroundColor: Colors.transparent,
+      child: Scaffold(
+        backgroundColor: Colors.transparent,
         body: _isLoading
             ? const Center(child: CircularProgressIndicator())
             : filmesFavoritos.isEmpty
-                ? const Center(child: Text('Nenhum filme favoritado encontrado.'))
+                ? const Center(
+                    child: Text('Nenhum filme favoritado encontrado.'))
                 : ListView.builder(
                     itemCount: filmesFavoritos.length,
                     itemBuilder: (context, index) {
                       final filme = filmesFavoritos[index];
                       return Card(
-                          color: Colors.transparent,
-                          elevation: 0,
-                          margin: const EdgeInsets.only(bottom: 16.0),
-                          child: Padding(
-                            padding: const EdgeInsets.all(16.0),
-                            child: Row(
-                              children: [
-                                GestureDetector(
-                                  onTap: () {
-                                    showDialog(
-                                      context: context,
-                                      builder: (context) => Dialog(
-                                        backgroundColor: Colors.transparent,
-                                        child: Column(
-                                          mainAxisSize: MainAxisSize.min,
-                                          children: [
-                                            Image.network(
-                                              filme.poster,
-                                              fit: BoxFit.cover,
-                                            ),
-                                          ],
-                                        ),
+                        color: Colors.transparent,
+                        elevation: 0,
+                        margin: const EdgeInsets.only(bottom: 16.0),
+                        child: Padding(
+                          padding: const EdgeInsets.all(16.0),
+                          child: Row(
+                            children: [
+                              GestureDetector(
+                                onTap: () {
+                                  showDialog(
+                                    context: context,
+                                    builder: (context) => Dialog(
+                                      backgroundColor: Colors.transparent,
+                                      child: Column(
+                                        mainAxisSize: MainAxisSize.min,
+                                        children: [
+                                          Image.network(
+                                            filme.poster,
+                                            fit: BoxFit.cover,
+                                          ),
+                                        ],
                                       ),
-                                    );
-                                  },
-                                  child: Image.network(
-                                    filme.poster,
-                                    width: 100,
-                                    height: 150,
-                                    fit: BoxFit.cover,
-                                  ),
+                                    ),
+                                  );
+                                },
+                                child: Image.network(
+                                  filme.poster,
+                                  width: 100,
+                                  height: 150,
+                                  fit: BoxFit.cover,
                                 ),
-                                const SizedBox(width: 16.0),
-                                Expanded(
-                                  child: Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
-                                    children: [
-                                      Text(
-                                        "${filme.titulo} (${filme.ano})",
-                                        style: const TextStyle(
-                                          color: Colors.white,
-                                          fontSize: 18.0,
-                                          fontWeight: FontWeight.bold,
-                                        ),
+                              ),
+                              const SizedBox(width: 16.0),
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      "${filme.titulo} (${filme.ano})",
+                                      style: const TextStyle(
+                                        color: Colors.white,
+                                        fontSize: 18.0,
+                                        fontWeight: FontWeight.bold,
                                       ),
-                                      const SizedBox(height: 8.0),
-                                      Row(
+                                    ),
+                                    const SizedBox(height: 8.0),
+                                    Row(
                                       children: [
                                         TextButton(
                                           onPressed: () {
@@ -160,12 +164,12 @@ class _TelaFavoritosState extends State<TelaFavoritos> {
                                         const SizedBox(width: 16.0),
                                         TextButton(
                                           onPressed: () async {
-                                            if (favoritado) {
+                                            if (filmesFavoritados[filme.imdbID] ?? false) {
                                               await DatabaseHelper()
                                                   .removerFilmeFavorito(
                                                       filme.imdbID);
                                               setState(() {
-                                                favoritado = false;
+                                                filmesFavoritados[filme.imdbID] = false;
                                               });
                                               ScaffoldMessenger.of(context)
                                                   .showSnackBar(
@@ -178,7 +182,7 @@ class _TelaFavoritosState extends State<TelaFavoritos> {
                                               await DatabaseHelper()
                                                   .favoritarFilme(filme.imdbID);
                                               setState(() {
-                                                favoritado = true;
+                                                filmesFavoritados[filme.imdbID] = true;
                                               });
                                               ScaffoldMessenger.of(context)
                                                   .showSnackBar(
@@ -190,7 +194,7 @@ class _TelaFavoritosState extends State<TelaFavoritos> {
                                             }
                                           },
                                           child: Icon(
-                                            favoritado
+                                            filmesFavoritados[filme.imdbID] ?? false
                                                 ? Icons.favorite
                                                 : Icons.favorite_border,
                                             color: Colors.white,
@@ -199,11 +203,11 @@ class _TelaFavoritosState extends State<TelaFavoritos> {
                                         const SizedBox(width: 16.0),
                                         TextButton(
                                           onPressed: () async {
-                                            if (marcarAssistir) {
+                                            if (filmesWatchlist[filme.imdbID] ?? false) {
                                               await DatabaseHelper()
                                                   .removerWatch(filme.imdbID);
                                               setState(() {
-                                                marcarAssistir = false;
+                                                filmesWatchlist[filme.imdbID] = false;
                                               });
                                               ScaffoldMessenger.of(context)
                                                   .showSnackBar(
@@ -216,7 +220,7 @@ class _TelaFavoritosState extends State<TelaFavoritos> {
                                               await DatabaseHelper()
                                                   .adicionarWatch(filme.imdbID);
                                               setState(() {
-                                                marcarAssistir = true;
+                                                filmesWatchlist[filme.imdbID] = true;
                                               });
                                               ScaffoldMessenger.of(context)
                                                   .showSnackBar(
@@ -228,7 +232,7 @@ class _TelaFavoritosState extends State<TelaFavoritos> {
                                             }
                                           },
                                           child: Icon(
-                                            marcarAssistir
+                                            filmesWatchlist[filme.imdbID] ?? false
                                                 ? Icons.visibility
                                                 : Icons.visibility_outlined,
                                             color: Colors.white,
@@ -236,13 +240,13 @@ class _TelaFavoritosState extends State<TelaFavoritos> {
                                         ),
                                       ],
                                     ),
-                                    ],
-                                  ),
+                                  ],
                                 ),
-                              ],
-                            ),
+                              ),
+                            ],
                           ),
-                        );
+                        ),
+                      );
                     },
                   ),
       ),

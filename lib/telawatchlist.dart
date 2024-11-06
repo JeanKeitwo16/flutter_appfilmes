@@ -1,22 +1,21 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_appfilmes/filme.dart';
-import 'package:flutter_appfilmes/filmecurtido.dart';
+import 'package:flutter_appfilmes/watchlist.dart';
 import 'package:flutter_appfilmes/DatabaseHelper.dart';
 import 'package:flutter_appfilmes/telafilme.dart';
-import 'telafilme.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 
-class TelaFavoritos extends StatefulWidget {
-  const TelaFavoritos({super.key});
+class TelaWatchList extends StatefulWidget {
+  const TelaWatchList({super.key});
 
   @override
-  _TelaFavoritosState createState() => _TelaFavoritosState();
+  _TelaWatchListState createState() => _TelaWatchListState();
 }
 
-class _TelaFavoritosState extends State<TelaFavoritos> {
+class _TelaWatchListState extends State<TelaWatchList> {
   final DatabaseHelper _databaseHelper = DatabaseHelper();
-  List<Filme> filmesFavoritos = [];
+  List<Filme> watchListFilmes = [];
   bool _isLoading = true;
   bool favoritado = false;
   bool marcarAssistir = false;
@@ -29,26 +28,26 @@ class _TelaFavoritosState extends State<TelaFavoritos> {
 
   Future<void> _loadFavoriteMovies() async {
     try {
-      List<FilmeCurtido> filmesCurtidos = await _databaseHelper.getFilmesFavoritos();
+      List<Watchlist> listaAssistir = await _databaseHelper.getWatchList();
       List<Filme> filmes = [];
 
-      for (var filmeCurtido in filmesCurtidos) {
-        final resposta = await http.get(
-          Uri.parse('https://www.omdbapi.com/?i=${filmeCurtido.imdbID}&apikey=94a7ea1'),
+      for (var filmeAssistir in listaAssistir) {
+        final response = await http.get(
+          Uri.parse('https://www.omdbapi.com/?i=${filmeAssistir.imdbID}&apikey=94a7ea1'),
         );
 
-        if (resposta.statusCode == 200) {
-          final data = json.decode(resposta.body);
+        if (response.statusCode == 200) {
+          final data = json.decode(response.body);
           if (data['Response'] == "True") {
             filmes.add(Filme.fromJson(data));
           }
         } else {
-          throw Exception('Falha ao carregar o filme com ID: ${filmeCurtido.imdbID}');
+          throw Exception('Falha ao carregar o filme com ID: ${filmeAssistir.imdbID}');
         }
       }
 
       setState(() {
-        filmesFavoritos = filmes;
+        watchListFilmes = filmes;
         _isLoading = false;
       });
     } catch (error) {
@@ -77,12 +76,12 @@ class _TelaFavoritosState extends State<TelaFavoritos> {
       child: Scaffold(backgroundColor: Colors.transparent,
         body: _isLoading
             ? const Center(child: CircularProgressIndicator())
-            : filmesFavoritos.isEmpty
+            : watchListFilmes.isEmpty
                 ? const Center(child: Text('Nenhum filme favoritado encontrado.'))
                 : ListView.builder(
-                    itemCount: filmesFavoritos.length,
+                    itemCount: watchListFilmes.length,
                     itemBuilder: (context, index) {
-                      final filme = filmesFavoritos[index];
+                      final filme = watchListFilmes[index];
                       return Card(
                           color: Colors.transparent,
                           elevation: 0,

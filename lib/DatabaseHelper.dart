@@ -1,3 +1,4 @@
+import 'package:flutter_appfilmes/watchlist.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
 import 'package:flutter_appfilmes/filmecurtido.dart';
@@ -28,6 +29,12 @@ class DatabaseHelper {
             imdbID TEXT UNIQUE
           )
         ''');
+        await db.execute('''
+          CREATE TABLE WatchList(
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            imdbID TEXT UNIQUE
+          )
+        ''');
       },
     );
   }
@@ -37,11 +44,11 @@ class DatabaseHelper {
     await db.insert(
       'MovieLiked',
       {'imdbID': imdbID},
-      conflictAlgorithm: ConflictAlgorithm.ignore, // Não adicionar se já existir
+      conflictAlgorithm: ConflictAlgorithm.ignore,
     );
   }
 
-  Future<List<FilmeCurtido>> getFilmes() async {
+  Future<List<FilmeCurtido>> getFilmesFavoritos() async {
   final db = await database;
   final List<Map<String, dynamic>> maps = await db.query('MovieLiked');
   return List.generate(maps.length, (i) {
@@ -49,7 +56,7 @@ class DatabaseHelper {
   });
 }
 
-  Future<void> removerFilme(String imdbID) async {
+  Future<void> removerFilmeFavorito(String imdbID) async {
     final db = await database;
     await db.delete(
       'MovieLiked',
@@ -64,6 +71,41 @@ class DatabaseHelper {
       where: 'imdbID = ?',
       whereArgs: [imdbID],
     );
-    return result.isNotEmpty; // Retorna true se houver resultados, ou false caso contrário
+    return result.isNotEmpty;
+  }
+
+  Future<void> adicionarWatch(String imdbID) async {
+    final db = await database;
+    await db.insert(
+      'WatchList',
+      {'imdbID': imdbID},
+      conflictAlgorithm: ConflictAlgorithm.ignore,
+    );
+  }
+
+  Future<List<Watchlist>> getWatchList() async {
+  final db = await database;
+  final List<Map<String, dynamic>> maps = await db.query('WatchList');
+  return List.generate(maps.length, (i) {
+    return Watchlist.fromMap(maps[i]);
+  });
+}
+
+  Future<void> removerWatch(String imdbID) async {
+    final db = await database;
+    await db.delete(
+      'WatchList',
+      where: 'imdbID = ?',
+      whereArgs: [imdbID],
+    );
+  }
+  Future<bool> verificarWatch(String imdbID) async {
+    final db = await database;
+    final List<Map<String, dynamic>> result = await db.query(
+      'WatchList',
+      where: 'imdbID = ?',
+      whereArgs: [imdbID],
+    );
+    return result.isNotEmpty;
   }
 }

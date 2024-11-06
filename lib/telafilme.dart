@@ -22,12 +22,14 @@ class _telaFilmeState extends State<telaFilme> {
   String genero = '';
   bool isLoading = true;
   bool favoritado = false;
+  bool marcarAssistir = false;
 
   @override
   void initState() {
     super.initState();
     fetchMovieDetails();
     verificarFavorito();
+    verificarWatchList();
   }
 
   Future<void> fetchMovieDetails() async {
@@ -55,6 +57,10 @@ class _telaFilmeState extends State<telaFilme> {
 
   Future<void> verificarFavorito() async {
     favoritado = await DatabaseHelper().verificarFavorito(widget.imdbID);
+    setState(() {});
+  }
+  Future<void> verificarWatchList() async {
+    favoritado = await DatabaseHelper().verificarWatch(widget.imdbID);
     setState(() {});
   }
 
@@ -140,7 +146,7 @@ class _telaFilmeState extends State<telaFilme> {
                           TextButton(
                                 onPressed: () async {
                                   if (favoritado) {
-                                    await DatabaseHelper().removerFilme(widget.imdbID);
+                                    await DatabaseHelper().removerFilmeFavorito(widget.imdbID);
                                     setState(() {
                                       favoritado = false;
                                     });
@@ -166,13 +172,43 @@ class _telaFilmeState extends State<telaFilme> {
                                   color: Colors.white,
                                 ),
                               ),
-                          IconButton(
-                            onPressed: () {},
-                            icon: const Icon(
-                              Icons.visibility,
-                              color: Colors.white,
-                            ),
-                          ),
+                          TextButton(
+                                          onPressed: () async {
+                                            if (marcarAssistir) {
+                                              await DatabaseHelper()
+                                                  .removerWatch(widget.imdbID);
+                                              setState(() {
+                                                marcarAssistir = false;
+                                              });
+                                              ScaffoldMessenger.of(context)
+                                                  .showSnackBar(
+                                                SnackBar(
+                                                  content: Text(
+                                                      '${titulo} removido da WatchList!'),
+                                                ),
+                                              );
+                                            } else {
+                                              await DatabaseHelper()
+                                                  .adicionarWatch(widget.imdbID);
+                                              setState(() {
+                                                marcarAssistir = true;
+                                              });
+                                              ScaffoldMessenger.of(context)
+                                                  .showSnackBar(
+                                                SnackBar(
+                                                  content: Text(
+                                                      '${titulo} adicionado à WatchList!'),
+                                                ),
+                                              );
+                                            }
+                                          },
+                                          child: Icon(
+                                            marcarAssistir
+                                                ? Icons.visibility
+                                                : Icons.visibility_outlined,
+                                            color: Colors.white,
+                                          ),
+                                        ),
                         ],
                       ),
                       const SizedBox(height: 16.0),

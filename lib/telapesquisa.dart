@@ -30,6 +30,8 @@ class MovieListScreen extends StatefulWidget {
 class _MovieListScreenState extends State<MovieListScreen> {
   List<Filme> listaFilmes = [];
   bool isLoading = false;
+  bool favoritado = false;
+  bool marcarAssistir = false;
   TextEditingController pesquisa = TextEditingController();
 
   Future<void> fetchMovies(String query) async {
@@ -180,24 +182,79 @@ class _MovieListScreenState extends State<MovieListScreen> {
                                         const SizedBox(width: 16.0),
                                         TextButton(
                                           onPressed: () async {
-                                            await DatabaseHelper()
-                                                .favoritarFilme(
-                                                    movie.imdbID);
-                                            ScaffoldMessenger.of(context)
-                                                .showSnackBar(
-                                              SnackBar(
+                                            if (favoritado) {
+                                              await DatabaseHelper()
+                                                  .removerFilmeFavorito(
+                                                      movie.imdbID);
+                                              setState(() {
+                                                favoritado = false;
+                                              });
+                                              ScaffoldMessenger.of(context)
+                                                  .showSnackBar(
+                                                SnackBar(
                                                   content: Text(
-                                                      '${movie.titulo} adicionado aos favoritos!')),
-                                            );
+                                                      '${movie.titulo} removido dos favoritos!'),
+                                                ),
+                                              );
+                                            } else {
+                                              await DatabaseHelper()
+                                                  .favoritarFilme(movie.imdbID);
+                                              setState(() {
+                                                favoritado = true;
+                                              });
+                                              ScaffoldMessenger.of(context)
+                                                  .showSnackBar(
+                                                SnackBar(
+                                                  content: Text(
+                                                      '${movie.titulo} adicionado aos favoritos!'),
+                                                ),
+                                              );
+                                            }
                                           },
-                                          child: const Icon(Icons.favorite_border,
-                                              color: Colors.white),
+                                          child: Icon(
+                                            favoritado
+                                                ? Icons.favorite
+                                                : Icons.favorite_border,
+                                            color: Colors.white,
+                                          ),
                                         ),
                                         const SizedBox(width: 16.0),
                                         TextButton(
-                                          onPressed: () {},
-                                          child: const Icon(Icons.visibility,
-                                              color: Colors.white),
+                                          onPressed: () async {
+                                            if (marcarAssistir) {
+                                              await DatabaseHelper()
+                                                  .removerWatch(movie.imdbID);
+                                              setState(() {
+                                                marcarAssistir = false;
+                                              });
+                                              ScaffoldMessenger.of(context)
+                                                  .showSnackBar(
+                                                SnackBar(
+                                                  content: Text(
+                                                      '${movie.titulo} removido da WatchList!'),
+                                                ),
+                                              );
+                                            } else {
+                                              await DatabaseHelper()
+                                                  .adicionarWatch(movie.imdbID);
+                                              setState(() {
+                                                marcarAssistir = true;
+                                              });
+                                              ScaffoldMessenger.of(context)
+                                                  .showSnackBar(
+                                                SnackBar(
+                                                  content: Text(
+                                                      '${movie.titulo} adicionado à WatchList!'),
+                                                ),
+                                              );
+                                            }
+                                          },
+                                          child: Icon(
+                                            marcarAssistir
+                                                ? Icons.visibility
+                                                : Icons.visibility_outlined,
+                                            color: Colors.white,
+                                          ),
                                         ),
                                       ],
                                     ),

@@ -30,14 +30,24 @@ class MovieListScreen extends StatefulWidget {
 class _MovieListScreenState extends State<MovieListScreen> {
   List<Filme> listaFilmes = [];
   bool isLoading = false;
-  bool favoritado = false;
-  bool marcarAssistir = false;
+  
+  Map<String, bool> filmesFavoritados = {};
+  Map<String, bool> filmesWatchlist = {};
+
   TextEditingController pesquisa = TextEditingController();
 
   Future<void> fetchMovies(String query) async {
     setState(() {
       isLoading = true;
     });
+
+    Future<void> verificarFavorito(String imdbID) async {
+    filmesFavoritados[imdbID] = await DatabaseHelper().verificarFavorito(imdbID);
+  }
+
+  Future<void> verificarWatchList(String imdbID) async {
+    filmesWatchlist[imdbID] = await DatabaseHelper().verificarWatch(imdbID);
+  }
 
     final response = await http
         .get(Uri.parse('https://www.omdbapi.com/?s=$query&apikey=94a7ea1'));

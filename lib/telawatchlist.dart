@@ -18,7 +18,6 @@ class _TelaWatchListState extends State<TelaWatchList> {
   List<Filme> watchListFilmes = [];
   bool _isLoading = true;
 
-  // Mapeia o estado de cada filme (favoritado, watchlist)
   Map<String, bool> filmesFavoritados = {};
   Map<String, bool> filmesWatchlist = {};
 

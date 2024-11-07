@@ -24,7 +24,7 @@ class _TelaWatchListState extends State<TelaWatchList> {
   @override
   void initState() {
     super.initState();
-    _loadFavoriteMovies();
+    _loadWatchList();
   }
 
   Future<void> verificarFavorito(String imdbID) async {
@@ -35,7 +35,7 @@ class _TelaWatchListState extends State<TelaWatchList> {
     filmesWatchlist[imdbID] = await DatabaseHelper().verificarWatch(imdbID);
   }
 
-  Future<void> _loadFavoriteMovies() async {
+  Future<void> _loadWatchList() async {
     try {
       List<Watchlist> listaAssistir = await _databaseHelper.getWatchList();
       List<Filme> filmes = [];

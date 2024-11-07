@@ -4,6 +4,7 @@ import 'package:flutter_appfilmes/telafavoritos.dart';
 import 'package:flutter_appfilmes/telawatchlist.dart';
 
 void main() {
+  
   runApp(const AppCustoViagem());
 }
 
@@ -30,7 +31,7 @@ class _AppCustoViagemState extends State<AppCustoViagem> {
 
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      title: "App Custo Viagem",
+      title: "App Filmes",
       home: Scaffold(
         body: Center(child: listaTelas[telaSelecionada]),
         bottomNavigationBar: BottomNavigationBar(

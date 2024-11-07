@@ -13,6 +13,7 @@ class TelaPesquisa extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      debugShowCheckedModeBanner: false,
       home: Scaffold(
         body: MovieListScreen(),
       ),
@@ -36,18 +37,18 @@ class _MovieListScreenState extends State<MovieListScreen> {
 
   TextEditingController pesquisa = TextEditingController();
 
-  Future<void> fetchMovies(String query) async {
-    setState(() {
-      isLoading = true;
-    });
-
-    Future<void> verificarFavorito(String imdbID) async {
+  Future<void> verificarFavorito(String imdbID) async {
     filmesFavoritados[imdbID] = await DatabaseHelper().verificarFavorito(imdbID);
   }
 
   Future<void> verificarWatchList(String imdbID) async {
     filmesWatchlist[imdbID] = await DatabaseHelper().verificarWatch(imdbID);
   }
+
+  Future<void> fetchMovies(String query) async {
+    setState(() {
+      isLoading = true;
+    });
 
     final response = await http
         .get(Uri.parse('https://www.omdbapi.com/?s=$query&apikey=94a7ea1'));
@@ -57,13 +58,17 @@ class _MovieListScreenState extends State<MovieListScreen> {
       if (data['Response'] == "True") {
         setState(() {
           listaFilmes = (data['Search'] as List)
-              .map((movie) => Filme.fromJson({
-                    ...movie,
-                    'Genre': movie['Genre'] ?? 'N/A',
+              .map((filme) => Filme.fromJson({
+                    ...filme,
+                    'Genre': filme['Genre'] ?? 'N/A',
                   }))
               .toList();
           isLoading = false;
         });
+        for (var filme in listaFilmes) {
+          await verificarFavorito(filme.imdbID);
+          await verificarWatchList(filme.imdbID);
+        }
       } else {
         setState(() {
           listaFilmes = [];
@@ -74,6 +79,7 @@ class _MovieListScreenState extends State<MovieListScreen> {
       throw Exception('Falha ao carregar filmes');
     }
   }
+  
 
   @override
   Widget build(BuildContext context) {
@@ -125,7 +131,7 @@ class _MovieListScreenState extends State<MovieListScreen> {
                     padding: const EdgeInsets.all(16.0),
                     itemCount: listaFilmes.length,
                     itemBuilder: (context, index) {
-                      final movie = listaFilmes[index];
+                      final filme = listaFilmes[index];
                       return Card(
                         color: Colors.transparent,
                         elevation: 0,
@@ -144,7 +150,7 @@ class _MovieListScreenState extends State<MovieListScreen> {
                                         mainAxisSize: MainAxisSize.min,
                                         children: [
                                           Image.network(
-                                            movie.poster,
+                                            filme.poster,
                                             fit: BoxFit.cover,
                                           ),
                                         ],
@@ -153,7 +159,7 @@ class _MovieListScreenState extends State<MovieListScreen> {
                                   );
                                 },
                                 child: Image.network(
-                                  movie.poster,
+                                  filme.poster,
                                   width: 100,
                                   height: 150,
                                   fit: BoxFit.cover,
@@ -165,7 +171,7 @@ class _MovieListScreenState extends State<MovieListScreen> {
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
                                     Text(
-                                      "${movie.titulo} (${movie.ano})",
+                                      "${filme.titulo} (${filme.ano})",
                                       style: const TextStyle(
                                         color: Colors.white,
                                         fontSize: 18.0,
@@ -181,7 +187,7 @@ class _MovieListScreenState extends State<MovieListScreen> {
                                               context,
                                               MaterialPageRoute(
                                                 builder: (context) => TelaFilme(
-                                                  imdbID: movie.imdbID,
+                                                  imdbID: filme.imdbID,
                                                 ),
                                               ),
                                             );
@@ -192,37 +198,37 @@ class _MovieListScreenState extends State<MovieListScreen> {
                                         const SizedBox(width: 16.0),
                                         TextButton(
                                           onPressed: () async {
-                                            if (favoritado) {
+                                            if (filmesFavoritados[filme.imdbID] ?? false) {
                                               await DatabaseHelper()
                                                   .removerFilmeFavorito(
-                                                      movie.imdbID);
+                                                      filme.imdbID);
                                               setState(() {
-                                                favoritado = false;
+                                                filmesFavoritados[filme.imdbID] = false;
                                               });
                                               ScaffoldMessenger.of(context)
                                                   .showSnackBar(
                                                 SnackBar(
                                                   content: Text(
-                                                      '${movie.titulo} removido dos favoritos!'),
+                                                      '${filme.titulo} removido dos favoritos!'),
                                                 ),
                                               );
                                             } else {
                                               await DatabaseHelper()
-                                                  .favoritarFilme(movie.imdbID);
+                                                  .favoritarFilme(filme.imdbID);
                                               setState(() {
-                                                favoritado = true;
+                                                filmesFavoritados[filme.imdbID] = true;
                                               });
                                               ScaffoldMessenger.of(context)
                                                   .showSnackBar(
                                                 SnackBar(
                                                   content: Text(
-                                                      '${movie.titulo} adicionado aos favoritos!'),
+                                                      '${filme.titulo} adicionado aos favoritos!'),
                                                 ),
                                               );
                                             }
                                           },
                                           child: Icon(
-                                            favoritado
+                                            filmesFavoritados[filme.imdbID] ?? false
                                                 ? Icons.favorite
                                                 : Icons.favorite_border,
                                             color: Colors.white,
@@ -231,36 +237,36 @@ class _MovieListScreenState extends State<MovieListScreen> {
                                         const SizedBox(width: 16.0),
                                         TextButton(
                                           onPressed: () async {
-                                            if (marcarAssistir) {
+                                            if (filmesWatchlist[filme.imdbID] ?? false) {
                                               await DatabaseHelper()
-                                                  .removerWatch(movie.imdbID);
+                                                  .removerWatch(filme.imdbID);
                                               setState(() {
-                                                marcarAssistir = false;
+                                                filmesWatchlist[filme.imdbID] = false;
                                               });
                                               ScaffoldMessenger.of(context)
                                                   .showSnackBar(
                                                 SnackBar(
                                                   content: Text(
-                                                      '${movie.titulo} removido da WatchList!'),
+                                                      '${filme.titulo} removido da WatchList!'),
                                                 ),
                                               );
                                             } else {
                                               await DatabaseHelper()
-                                                  .adicionarWatch(movie.imdbID);
+                                                  .adicionarWatch(filme.imdbID);
                                               setState(() {
-                                                marcarAssistir = true;
+                                                filmesWatchlist[filme.imdbID] = true;
                                               });
                                               ScaffoldMessenger.of(context)
                                                   .showSnackBar(
                                                 SnackBar(
                                                   content: Text(
-                                                      '${movie.titulo} adicionado à WatchList!'),
+                                                      '${filme.titulo} adicionado à WatchList!'),
                                                 ),
                                               );
                                             }
                                           },
                                           child: Icon(
-                                            marcarAssistir
+                                            filmesWatchlist[filme.imdbID] ?? false
                                                 ? Icons.visibility
                                                 : Icons.visibility_outlined,
                                             color: Colors.white,
